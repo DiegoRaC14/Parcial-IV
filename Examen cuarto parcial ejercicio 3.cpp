@@ -2,101 +2,130 @@
 #include <stdlib.h>
 #include <time.h>
 
-int busquedaBinaria(int lista[], int numElementos, int elemento);
-int busquedaSecuencial(int lista[], int numElementos, int elemento);
+#define TAMANO_ARREGLO 50000//Tamaño del arreglo original
+#define REPETICIONES 100 //Veces que se repite el programa
+
+
+int busquedaSecuencial(int arreglo[], int tamano, int elemento);// Implementación de la búsqueda secuencial
+int busquedaBinaria(int arreglo[], int inicio, int fin, int elemento);// Implementación de la búsqueda binaria
+double calcularTiempo(clock_t inicio, clock_t fin);// Función para calcular el tiempo de ejecución 
 
 int main() 
 {
-    int i,numeroBuscar;
+    int arreglo[TAMANO_ARREGLO];
 
+    // Genera un arreglo ordenado de 50,000 elementos
+    for (int i = 0; i < TAMANO_ARREGLO; i++) 
+	{
+        arreglo[i] = i;
+    }
+
+    // Inicializa la semilla para generar números aleatorios
     srand(time(NULL));
-    int lista[50000];
 
-    printf("Lista sin ordenar: \n\n");
-
-    for (i = 0; i < 50000; i++) 
+    // Ejecuta 100 búsquedas independientes para la búsqueda secuencial
+    double tiemposSecuencial[REPETICIONES];
+    for (int i = 0; i < REPETICIONES; i++) 
 	{
-        lista[i] = rand() % 50000;
-        //printf("%d, ", lista[i]);
+        int elementoBuscado = rand() % TAMANO_ARREGLO;
+
+        clock_t inicioSecuencial = clock();
+        busquedaSecuencial(arreglo, TAMANO_ARREGLO, elementoBuscado);
+        clock_t finSecuencial = clock();
+
+        tiemposSecuencial[i] = calcularTiempo(inicioSecuencial, finSecuencial);
     }
-    printf("\n\n");
-    
-	elemento=rand() % 50000;
-    printf("Elemento a buscar: %d",elemento);
-    
 
-    
-    // Llamada a la función de búsqueda binaria
-    
-	for (int i = 0; i < 100; i++)
-	{
-		lock_t tic = clock();
-		posicion = busquedaBinaria(lista, num, elemento);
-		clock_t toc = clock();// Termina cronómetro
-    	printf("\nTiempo de ejecucion vuelta %d: %f segundos\n",i, (double)(toc - tic) / CLOCKS_PER_SEC);	
-	}
+    // Ejecuta 100 búsquedas independientes para la búsqueda binaria
+    double tiemposBinaria[REPETICIONES];
+    for (int i = 0; i < REPETICIONES; i++) {
+        int elementoBuscado = rand() % TAMANO_ARREGLO;
 
-    
-    if (posicion != -1) 
-	{
-        printf("Posicion:%d\n", posicion);
-    } else 
-	{
-        printf("Elemento no se encuentra\n");
+        clock_t inicioBinaria = clock();
+        busquedaBinaria(arreglo, 0, TAMANO_ARREGLO - 1, elementoBuscado);
+        clock_t finBinaria = clock();
+
+        tiemposBinaria[i] = calcularTiempo(inicioBinaria, finBinaria);
     }
-    
-    
-    	for (int i = 0; i < 100; i++)
-	{
-		lock_t tic = clock();
-		busquedaSecuencial(lista, num, elemento);
-		clock_t toc = clock();// Termina cronómetro
-    	printf("\nTiempo de ejecucion vuelta %d: %f segundos\n",i, (double)(toc - tic) / CLOCKS_PER_SEC);	
-	}
 
-    
+    // Calcula y presenta estadísticas resumidas para la búsqueda secuencial
+    double promedioSecuencial = 0, minSecuencial = tiemposSecuencial[0], maxSecuencial = tiemposSecuencial[0];
+    for (int i = 0; i < REPETICIONES; i++) {
+        promedioSecuencial += tiemposSecuencial[i];
+
+        if (tiemposSecuencial[i] < minSecuencial) {
+            minSecuencial = tiemposSecuencial[i];
+        }
+
+        if (tiemposSecuencial[i] > maxSecuencial) {
+            maxSecuencial = tiemposSecuencial[i];
+        }
+    }
+    promedioSecuencial /= REPETICIONES;
+
+    printf("Busqueda Secuencial:\n");
+    printf("Promedio: %.6f segundos\n", promedioSecuencial);
+    printf("Minimo: %.6f segundos\n", minSecuencial);
+    printf("Maximo: %.6f segundos\n", maxSecuencial);
+
+    // Calcula y presenta estadísticas resumidas para la búsqueda binaria
+    double promedioBinaria = 0, minBinaria = tiemposBinaria[0], maxBinaria = tiemposBinaria[0];
+    for (int i = 0; i < REPETICIONES; i++) {
+        promedioBinaria += tiemposBinaria[i];
+
+        if (tiemposBinaria[i] < minBinaria) {
+            minBinaria = tiemposBinaria[i];
+        }
+
+        if (tiemposBinaria[i] > maxBinaria) {
+            maxBinaria = tiemposBinaria[i];
+        }
+    }
+    promedioBinaria /= REPETICIONES;
+
+    printf("\nBusqueda Binaria:\n");
+    printf("Promedio: %.6f segundos\n", promedioBinaria);
+    printf("Minimo: %.6f segundos\n", minBinaria);
+    printf("Maximo: %.6f segundos\n", maxBinaria);
+
     return 0;
 }
 
-int busquedaBinaria(int lista[], int numElementos, int elemento)
- {
-    int primero = 0;
-    int ultimo = numElementos - 1;
-    int mitad;
-    
-    while (primero <= ultimo) {
-        mitad = (primero + ultimo) / 2;
+// Implementación de la búsqueda secuencial
+int busquedaSecuencial(int arreglo[], int tamano, int elemento) {
+    for (int i = 0; i < tamano; i++) {
+        if (arreglo[i] == elemento) {
+            return i; // Retorna la posición si se encuentra el elemento
+        }
+    }
+    return -1; // Retorna -1 si no se encuentra el elemento
+}
+
+// Implementación de la búsqueda binaria
+int busquedaBinaria(int arreglo[], int inicio, int fin, int elemento) 
+{
+    while (inicio <= fin)
+	 {
+        int medio = inicio + (fin - inicio) / 2;
         
-        if (lista[mitad] < elemento) {
-            primero = mitad + 1;
-        } else if (lista[mitad] == elemento) {
-            return mitad;  // Devuelve la posición si encuentra el elemento
+        if (arreglo[medio] == elemento) {
+            return medio; // Retorna la posición si se encuentra el elemento
+        }
+
+        if (arreglo[medio] < elemento) {
+            inicio = medio + 1;
         } else {
-            ultimo = mitad - 1;
-        }
-    }
-    
-    return -1;  // Devuelve -1 si el elemento no se encuentra
-}
-
-// Función de búsqueda secuencial
-int busquedaSecuencial(int lista[], int numElementos, int elemento)
- {
-    int bandera = 0;
-
-    for (int i = 0; i < numElementos; i++) {
-        if (lista[i] == elemento) {
-            printf("Elemento en posicion: %d\n", i + 1);
-            bandera = 1;
-            break;
+            fin = medio - 1;
         }
     }
 
-    if (bandera == 0) 
-	{
-        printf("Elemento no se encuentra\n");
-    }
-
-    return bandera;
+    return -1; // Retorna -1 si no se encuentra el elemento
 }
+
+double calcularTiempo(clock_t inicio, clock_t fin) 
+{
+    return ((double) (fin - inicio) * 1000) / CLOCKS_PER_SEC;
+}
+
+
 
